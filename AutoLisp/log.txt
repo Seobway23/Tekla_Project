@@ -1,0 +1,1 @@
+Reading line: Entity ID,Type,DXF40,Model,Points
