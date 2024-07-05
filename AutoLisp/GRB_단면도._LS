@@ -11,8 +11,12 @@
   ;; X 간격 입력
   (setq xInterval (getreal "\n간격을 입력하십시오: "))
 
-  ;; 두 개의 선택된 객체가 모두 유효한지 확인
-  (if (and polylineObj1 polylineObj2)
+  ;; 두 개의 선택된 객체가 모두 폴리선인지 확인
+  (if (and polylineObj1 polylineObj2
+           (or (= (cdr (assoc 0 (entget polylineObj1))) "LWPOLYLINE")
+               (= (cdr (assoc 0 (entget polylineObj1))) "LINE"))
+           (or (= (cdr (assoc 0 (entget polylineObj2))) "LWPOLYLINE")
+               (= (cdr (assoc 0 (entget polylineObj2))) "LINE")))
     (progn
 
       ;; 전체 길이 입력
@@ -137,7 +141,7 @@
           (princ "\n폴리선 사이의 지정된 x 간격에서 DP 요소가 생성되었습니다."))
         (princ "\n두 폴리선의 x-간격 점이 일치하지 않습니다."))
       )
-    (princ "\n두 개의 선택된 객체가 유효하지 않습니다."))
+    (princ "\n하나 또는 두 개의 선택된 객체가 폴리선이 아닙니다."))
   (princ))
 
 (princ "\nLISP 명령을 로드하였습니다. 'IntPile' 명령을 사용하십시오.")

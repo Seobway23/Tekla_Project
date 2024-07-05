@@ -1,8 +1,8 @@
 (defun c:GP (/ polylineObj xInterval diameter thickness startPt intersectionPoints maxLen Interval num)
 
     ;; 라인타입을 로드
-  (if (not (tblsearch "LTYPE" "CENTER"))
-    (command "._-linetype" "Load" "CENTER" "acad.lin")
+  (if (not (tblsearch "LTYPE" lineTypeName))
+    (command "._-linetype" "Load" lineTypeName "acad.lin")
   )
   
   ;; 시작 위치를 입력받음

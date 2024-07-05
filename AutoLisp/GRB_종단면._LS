@@ -6,8 +6,8 @@
     (+ 1 (length (cdr lst)))))
 
    ;; 라인타입을 로드
-  (if (not (tblsearch "LTYPE" "CENTER"))
-    (command "._-linetype" "Load" "CENTER" "acad.lin")
+  (if (not (tblsearch "LTYPE" lineTypeName))
+    (command "._-linetype" "Load" lineTypeName "acad.lin")
   )
 
   

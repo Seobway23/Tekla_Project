@@ -1,16 +1,4 @@
 (defun c:GV (/ polylineObj1 polylineObj2 xInterval diameter thickness startPt intersectionPoints1 intersectionPoints2 maxLen interval num)
-
-  (defun length (lst)
-  (if (null lst)
-    0
-    (+ 1 (length (cdr lst)))))
-
-   ;; 라인타입을 로드
-  (if (not (tblsearch "LTYPE" "CENTER"))
-    (command "._-linetype" "Load" "CENTER" "acad.lin")
-  )
-
-  
   ;; 시작 위치를 입력받음
   (setq startPt (getpoint "\nDP 시작 위치를 선택하십시오: "))
 
