@@ -1,31 +1,32 @@
 (defun c:GV (/ polylineObj1 polylineObj2 xInterval diameter thickness startPt intersectionPoints1 intersectionPoints2 maxLen interval num)
 
-  (defun length (lst)
-  (if (null lst)
-    0
-    (+ 1 (length (cdr lst)))))
+;  (defun length (lst)
+;	  (setq len 0)
+;	  (setq temp lst)
+;	  (while temp
+;	    (setq len (+ len 1))
+;	    (setq temp (cdr temp)))
+;	  len)
 
-   ;; 라인타입을 로드
-  (if (not (tblsearch "LTYPE" lineTypeName))
-    (command "._-linetype" "Load" lineTypeName "acad.lin")
-  )
-
+	  (if (not (tblsearch "LTYPE" "CENTER"))
+	(command "._-linetype" "Load" "CENTER" "acad.lin")
+	)
   
   ;; 시작 위치를 입력받음
-  (setq startPt (getpoint "\nDP 시작 위치를 선택하십시오: "))
+  (setq startPt (getpoint "\n 말뚝상단 시점 시작 위치를 선택하십시오: "))
 
-  ;; 위쪽 객체를 선택
-  (setq polylineObj1 (car (entsel "\n위쪽 객체를 선택하십시오: ")))
+  ;; 위쪽 객체를 선택ㅣ
+  (setq polylineObj1 (car (entsel "\n 말뚝 상단 객체를 선택하십시오: ")))
   
   ;; 아래쪽 객체를 선택
-  (setq polylineObj2 (car (entsel "\n아래쪽 객체를 선택하십시오: ")))
+  (setq polylineObj2 (car (entsel "\n말뚝 하단 객체를 선택하십시오: ")))
 
   ;; X 간격 입력
   (setq xInterval (getreal "\n간격을 입력하십시오: "))
 
   ;; 전체 길이 입력
-  (setq maxLen (getreal "\n전체 길이를 입력하십시오:"))
-  (setq interval (/ (rem maxLen xInterval) 2))
+  (setq maxLen (getreal "\n전체 길이를 입력하십시오:"))  
+  (setq interval (/ xInterval 2))
   (setq num (fix (/ maxLen xInterval)))
   (setq num (+ num 1))
   
@@ -70,6 +71,7 @@
        (setq pt2 (cdr (assoc 11 entData)))
        (setq vertList (list pt1 pt2)) ; 라인을 폴리라인처럼 점 리스트로 변환
        (setq numVerts (length vertList))
+       (princ numVerts)
        (setq i 0 count 0)
        (while (and (< i (- numVerts 1)) (< count num))
          (setq pt1 (nth i vertList))
@@ -85,7 +87,10 @@
                    count (1+ count)))
            (setq j (1+ j)))
          (setq i (1+ i)))))
-    
+
+    	(princ "\n numVerts:")
+  	  (princ numVerts)
+   	 
     (reverse intersectionPoints))
   
   ;; 위쪽 객체와 아래쪽 객체의 교차점을 계산
