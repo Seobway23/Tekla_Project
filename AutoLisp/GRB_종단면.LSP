@@ -1,8 +1,3 @@
-;; Version 1.1.0
-;; Updated on 2024-07-08
-;; 양 끝단 들여쓰기는 간격의 1/2로 조정
-;; 양끝단 들여쓰기 1/2 로 유지하면서 마지막 말뚝 3개의 위치 조정
-
 (defun c:GV (/ polylineObj1 polylineObj2 xInterval diameter thickness startPt intersectionPoints1 intersectionPoints2 maxLen interval num endPt EP1 gap newPts)
 
   (if (not (tblsearch "LTYPE" "CENTER"))
@@ -38,71 +33,65 @@
   (setq thickness (getreal "\n두께를 입력하십시오: "))
 
 
- (defun get-intersection-points (entity xInterval startPt num)
-    (setq intersectionPoints '())
-    
-    ;; 시작 위치의 X 좌표를 기준으로 간격을 계산
-    (setq startX (car startPt))
-    
-    ;; Entity type 확인
-    (setq entityType (cdr (assoc 0 (entget entity))))
-    
-    (cond
-      ((equal entityType "LWPOLYLINE")
-       ;; 폴리라인의 경우
-       (setq vertList (mapcar 'cdr (vl-remove-if-not '(lambda (x) (= (car x) 10)) (entget entity))))
-       (setq numVerts (length vertList))
-       (setq i 0 count 0)
-       (while (and (< i (- numVerts 1)) (< count num))
-         (setq pt1 (nth i vertList))
-         (setq pt2 (nth (1+ i) vertList))
-         (setq x1 (car pt1) y1 (cadr pt1))
-         (setq x2 (car pt2) y2 (cadr pt2))
-         (setq j (fix (/ (- x1 startX) xInterval)))
-         (while (and (<= (+ startX (* j xInterval)) x2) (< count num))
-           (setq x (+ startX (* j xInterval)))
-           (if (and (<= x1 x x2) (/= x1 x2))
-             (setq y (+ y1 (* (/ (- y2 y1) (- x2 x1)) (- x x1)))
-                   intersectionPoints (cons (list x y 0) intersectionPoints)
-                   count (1+ count)))
-           (setq j (1+ j)))
-         (setq i (1+ i))))
-      ((equal entityType "LINE")
-       ;; 라인의 경우
-       (setq entData (entget entity))
-       (setq pt1 (cdr (assoc 10 entData)))
-       (setq pt2 (cdr (assoc 11 entData)))
-       (setq vertList (list pt1 pt2)) ; 라인을 폴리라인처럼 점 리스트로 변환
-       (setq numVerts (length vertList))
-       (setq i 0 count 0)
-       (while (and (< i (- numVerts 1)) (< count num))
-         (setq pt1 (nth i vertList))
-         (setq pt2 (nth (1+ i) vertList))
-         (setq x1 (car pt1) y1 (cadr pt1))
-         (setq x2 (car pt2) y2 (cadr pt2))
-         (setq j (fix (/ (- x1 startX) xInterval)))
-         (while (and (<= (+ startX (* j xInterval)) x2) (< count num))
-           (setq x (+ startX (* j xInterval)))
-           (if (and (<= x1 x x2) (/= x1 x2))
-             (setq y (+ y1 (* (/ (- y2 y1) (- x2 x1)) (- x x1)))
-                   intersectionPoints (cons (list x y 0) intersectionPoints)
-                   count (1+ count)))
-           (setq j (1+ j)))
-         (setq i (1+ i)))))
-    
-    (reverse intersectionPoints))
-  
-  ;; 위쪽 객체와 아래쪽 객체의 교차점을 계산
-  (setq intersectionPoints1 (get-intersection-points polylineObj1 xInterval (list (+ (car startPt) interval) (cadr startPt) (caddr startPt)) num))
-  (setq intersectionPoints2 (get-intersection-points polylineObj2 xInterval (list (+ (car startPt) interval) (cadr startPt) (caddr startPt)) num))
+  ;; 교차점 찾는 함수 
+  (defun get-intersection-points-from-start (entity xInterval startPt num)
+  (setq intersectionPoints '())
+
+  ;; 시작 위치의 X 좌표를 기준으로 간격을 계산
+  (setq startX (car startPt))
+
+  ;; Entity type 확인
+  (setq entityType (cdr (assoc 0 (entget entity))))
+
+  (cond
+    ((equal entityType "LWPOLYLINE")
+     ;; 폴리라인의 경우
+     (setq vertList (mapcar 'cdr (vl-remove-if-not '(lambda (x) (= (car x) 10)) (entget entity))))
+     (setq numVerts (length vertList))
+     (setq i 0 count 0)
+     (while (and (< i (- numVerts 1)) (< count num))
+       (setq pt1 (nth i vertList))
+       (setq pt2 (nth (1+ i) vertList))
+       (setq x1 (car pt1) y1 (cadr pt1))
+       (setq x2 (car pt2) y2 (cadr pt2))
+       (setq j (fix (/ (- startX x1) xInterval)))
+       (while (and (<= (+ x1 (* j xInterval)) x2) (< count num))
+         (setq x (+ x1 (* j xInterval)))
+         (if (and (<= x1 x x2) (/= x1 x2))
+           (setq y (+ y1 (* (/ (- y2 y1) (- x2 x1)) (- x x1)))
+                 intersectionPoints (cons (list x y 0) intersectionPoints)
+                 count (1+ count)))
+         (setq j (1+ j)))
+       (setq i (1+ i))))
+    ((equal entityType "LINE")
+     ;; 라인의 경우
+     (setq entData (entget entity))
+     (setq pt1 (cdr (assoc 10 entData)))
+     (setq pt2 (cdr (assoc 11 entData)))
+     (setq vertList (list pt1 pt2)) ; 라인을 폴리라인처럼 점 리스트로 변환
+     (setq numVerts (length vertList))
+     (setq i 0 count 0)
+     (while (and (< i (- numVerts 1)) (< count num))
+       (setq pt1 (nth i vertList))
+       (setq pt2 (nth (1+ i) vertList))
+       (setq x1 (car pt1) y1 (cadr pt1))
+       (setq x2 (car pt2) y2 (cadr pt2))
+       (setq j (fix (/ (- startX x1) xInterval)))
+       (while (and (<= (+ x1 (* j xInterval)) x2) (< count num))
+         (setq x (+ x1 (* j xInterval)))
+         (if (and (<= x1 x x2) (/= x1 x2))
+           (setq y (+ y1 (* (/ (- y2 y1) (- x2 x1)) (- x x1)))
+                 intersectionPoints (cons (list x y 0) intersectionPoints)
+                 count (1+ count)))
+         (setq j (1+ j)))
+       (setq i (1+ i)))))
+  (reverse intersectionPoints))
 
   
   ;; 위쪽 객체와 아래쪽 객체의 교차점을 계산
   (setq intersectionPoints1 (get-intersection-points polylineObj1 xInterval (list (+ (car startPt) interval) (cadr startPt) (caddr startPt)) num))
   (setq intersectionPoints2 (get-intersection-points polylineObj2 xInterval (list (+ (car startPt) interval) (cadr startPt) (caddr startPt)) num))
 
-  (princ intersectionPoints1)
-  
   ;; 두 객체의 교차점이 동일한 수인지 확인
   (if (= (length intersectionPoints1) (length intersectionPoints2))
     (progn
@@ -231,10 +220,10 @@
       (setq ss (ssget "_X" (list (cons 8 "GRB강관말뚝"))))
       
       ; Select lines on "GRB강관말뚝" layer
-      (command "_.pedit" "_multiple" ss "" "_yes" "_join" "" "")
+      (command "_.pedit" "_multiple" ss "" "_yes" "_join" "" "" "")
 	
     )
-  (princ "\n길이를 초과했습니다. 다시입력하세요."))
+  (princ "\n하나 또는 두 개의 선택된 객체가 폴리선 또는 라인이 아닙니다."))
 (princ))
 
 (princ "\nLISP 명령을 로드하였습니다. 'GV' 명령을 사용하십시오.")

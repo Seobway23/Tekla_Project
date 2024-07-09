@@ -75,3 +75,18 @@
 
 (princ "\nLISP 명령어가 로드되었습니다. 'GS' 명령어를 사용하여 GRB_CENTER 레이어의 선들을 분석하십시오.")
 (princ)
+
+
+
+
+
+
+	    ;; 마지막 행에 "전체 길이" 추가
+	    (setq total-length 0.0)
+	    (setq col 2)
+	    (while (< col (1+ (length (car table_list))))
+	      (setq total-length (+ total-length (rtos (sum-list (nth (1- col) table_list)) 2 2)))
+	      (setq col (1+ col))
+	    )
+	    (vla-SetText tblObj (1+ row) 0 "전체 길이")
+	    (vla-SetText tblObj (1+ row) col (rtos total-length 2 2))
